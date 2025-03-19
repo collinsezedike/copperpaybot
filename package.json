@@ -1,0 +1,26 @@
+{
+  "name": "copperpaybot",
+  "version": "1.0.0",
+  "description": "A simple telegram bot that integrates CopperX Payout API",
+  "main": "src/bot.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "dev": "ts-node src/bot.ts",
+    "start": "node dist/bot.js"
+  },
+  "keywords": [
+    "CopperX Payout API"
+  ],
+  "author": "Collins Ezedike-egwom",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.2",
+    "node-telegram-bot-api": "^0.66.0"
+  },
+  "devDependencies": {
+    "@types/node-telegram-bot-api": "^0.64.8",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
+  }
+}
