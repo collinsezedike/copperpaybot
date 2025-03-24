@@ -3,8 +3,8 @@ Welcome to CopperPay!🎊\n\nSign in to get started.🚀,
 `;
 
 export const POST_AUTH_MESSAGE = `
-Sign in successful!🎊
+Sign in successful! 🎊
 
-Use /wallet command to manage your wallets, view balance and transaction history
-Use /logout to log your accounts and expire all sessions.
+Use the /wallet command to manage your wallets, view balance and transaction history
+Use the /logout to log out your account and expire all sessions.
 `;

@@ -19,8 +19,22 @@ export class CopperAPI {
 
 	catchError(error: AxiosError) {
 		// If 422
-		// If 401
-		// If 500
+		switch (error.status) {
+			case 422:
+				throw Error(
+					"Your response appears to be either invalid or incomplete. Kindly check and try again."
+				);
+			case 401:
+				throw Error(
+					"Oops! It looks like you're not logged in. Please log in to continue."
+				);
+			case 500:
+				throw Error(
+					"An unexpected error occurred on our end. Please try again."
+				);
+			default:
+				throw error;
+		}
 	}
 
 	// ** AUTHENTICATION AND ACCOUNT MANAGEMENT ** //
@@ -55,7 +69,7 @@ export class CopperAPI {
 
 	async logout(accessToken: string) {
 		try {
-			await axios.post(`${this.url}/wallets/default`, null, {
+			await axios.post(`${this.url}/auth/logout`, null, {
 				headers: this.createAuthHeader(accessToken),
 			});
 		} catch (error: any) {
@@ -71,8 +85,7 @@ export class CopperAPI {
 			const response = await axios.get(`${this.url}/wallets/default`, {
 				headers: this.createAuthHeader(accessToken),
 			});
-			const defaultWallet = response.data;
-			return defaultWallet;
+			return response.data;
 		} catch (error: any) {
 			if (error instanceof AxiosError) this.catchError(error);
 			else throw error;
@@ -85,8 +98,7 @@ export class CopperAPI {
 			const response = await axios.get(`${this.url}/wallets/balance`, {
 				headers: this.createAuthHeader(accessToken),
 			});
-			const { balance } = response.data;
-			return balance;
+			return response.data;
 		} catch (error: any) {
 			if (error instanceof AxiosError) this.catchError(error);
 			else throw error;
@@ -99,24 +111,22 @@ export class CopperAPI {
 			const response = await axios.get(`${this.url}/wallets`, {
 				headers: this.createAuthHeader(accessToken),
 			});
-			const allWallets = response.data;
-			return allWallets;
+			return response.data;
 		} catch (error: any) {
 			if (error instanceof AxiosError) this.catchError(error);
 			else throw error;
 		}
 	}
 
-	async setDefaultWallet(accessToken: string, wallet: string) {
+	async setDefaultWallet(accessToken: string, walletId: string) {
 		try {
 			// Get the auth token
 			const response = await axios.post(
 				`${this.url}/wallets/default`,
-				{ wallet },
+				{ walletId },
 				{ headers: this.createAuthHeader(accessToken) }
 			);
-			const newDefaultWallet = response.data;
-			return newDefaultWallet;
+			return response.data;
 		} catch (error: any) {
 			if (error instanceof AxiosError) this.catchError(error);
 			else throw error;
@@ -128,8 +138,7 @@ export class CopperAPI {
 			data: { page_number },
 			headers: this.createAuthHeader(accessToken),
 		});
-		const newDefaultWallet = response.data;
-		return newDefaultWallet;
+		return response.data;
 	}
 	catch(error: any) {
 		if (error instanceof AxiosError) this.catchError(error);

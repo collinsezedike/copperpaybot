@@ -4,6 +4,7 @@ import bot from "../bot";
 import { CopperAPI } from "../utils/CopperAPI";
 import { POST_AUTH_MESSAGE } from "../utils/messages";
 import { Session } from "../utils/Session";
+import { getAccessToken } from "../utils/helpers";
 
 export async function authenticate(chat_id: number) {
 	try {
@@ -11,8 +12,10 @@ export async function authenticate(chat_id: number) {
 		bot.on("message", requestEmailOTP);
 	} catch (error: any) {
 		console.log("Error in autheticate callback");
-		console.error(error.message);
-		bot.sendMessage(chat_id, "An error occured. Let's try that again!");
+		bot.sendMessage(
+			chat_id,
+			`An error occured.\n\nCause: ${error.message}`
+		);
 	}
 }
 
@@ -33,8 +36,10 @@ async function requestEmailOTP(msg: Message) {
 		bot.on("message", authenticateEmailOTP);
 	} catch (error: any) {
 		console.log("Error in request email otp");
-		console.error(error.message);
-		bot.sendMessage(msg.chat.id, "An error occured. Let's try that again!");
+		bot.sendMessage(
+			msg.chat.id,
+			`An error occured.\n\nCause: ${error.message}`
+		);
 	}
 }
 
@@ -51,19 +56,23 @@ async function authenticateEmailOTP(msg: Message) {
 		bot.sendMessage(msg.chat.id, POST_AUTH_MESSAGE);
 	} catch (error: any) {
 		console.log("Error in autheticate email otp");
-		console.error(error.message);
-		bot.sendMessage(msg.chat.id, "An error occured. Let's try that again!");
+		bot.sendMessage(
+			msg.chat.id,
+			`An error occured.\n\nCause: ${error.message}`
+		);
 	}
 }
 
 export async function logoutCommand(msg: Message) {
 	try {
-		const session = new Session();
-		const { accessToken } = await session.getUserData(msg.chat.id);
-		if (accessToken) {
-			await new CopperAPI().logout(accessToken);
-			await session.deleteUserData(msg.chat.id);
+		const { isAuthorized, accessToken, message } = await getAccessToken(
+			msg.chat.id
+		);
+		if (!isAuthorized) {
+			return bot.sendMessage(msg.chat.id, message.text, message.options);
 		}
+		await new CopperAPI().logout(accessToken);
+		await new Session().deleteUserData(msg.chat.id);
 		const options = {
 			reply_markup: {
 				inline_keyboard: [
@@ -71,10 +80,12 @@ export async function logoutCommand(msg: Message) {
 				],
 			},
 		};
-		bot.sendMessage(msg.chat.id, "Logged out successfully.", options);
+		bot.sendMessage(msg.chat.id, "Thank you for using CopperPay!", options);
 	} catch (error: any) {
-		console.log("Error in loguot command");
-		console.error(error.message);
-		bot.sendMessage(msg.chat.id, "An error occured. Let's try that again!");
+		console.log("Error in logout command");
+		bot.sendMessage(
+			msg.chat.id,
+			`An error occured.\n\nCause: ${error.message}`
+		);
 	}
 }
