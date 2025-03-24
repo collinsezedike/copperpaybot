@@ -2,7 +2,12 @@ import "dotenv/config";
 import TelegramBot from "node-telegram-bot-api";
 
 import { authenticate } from "./commands/auth";
-import { logoutCommand, startCommand, walletCommand } from "./commands";
+import {
+	helpCommand,
+	logoutCommand,
+	startCommand,
+	walletCommand,
+} from "./commands";
 import {
 	getAllWallets,
 	setDefaultWallet,
@@ -14,6 +19,7 @@ const TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
 
 const bot = new TelegramBot(TOKEN, { polling: true });
 
+bot.onText(/\/help/, helpCommand);
 bot.onText(/\/start/, startCommand);
 bot.onText(/\/wallet/, walletCommand);
 bot.onText(/\/logout/, logoutCommand);

@@ -5,7 +5,7 @@ import bot from "../bot";
 import { logoutCommand } from "./auth";
 import { walletCommand } from "./wallet";
 
-import { START_MESSAGE } from "../utils/messages";
+import { START_MESSAGE, HELP_MESSAGE } from "../utils/messages";
 
 async function startCommand(msg: Message) {
 	const options = {
@@ -16,6 +16,10 @@ async function startCommand(msg: Message) {
 		},
 	};
 	bot.sendMessage(msg.chat.id, START_MESSAGE, options);
+}
+
+export function helpCommand(msg: Message) {
+	bot.sendMessage(msg.chat.id, HELP_MESSAGE);
 }
 
 export { logoutCommand, startCommand, walletCommand };
