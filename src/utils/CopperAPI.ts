@@ -45,8 +45,8 @@ export class CopperAPI {
 				`${this.url}/auth/email-otp/authenticate`,
 				{ email, sid, otp }
 			);
-			const { scheme, accessToken } = response.data;
-			return { scheme, accessToken };
+			const { accessToken } = response.data;
+			return accessToken;
 		} catch (error: any) {
 			if (error instanceof AxiosError) this.catchError(error);
 			else throw error;
@@ -62,5 +62,77 @@ export class CopperAPI {
 			if (error instanceof AxiosError) this.catchError(error);
 			else throw error;
 		}
+	}
+
+	// ** WALLET INTERACTIONS ** //
+	async getDefaultWallet(accessToken: string) {
+		try {
+			// Get the auth token
+			const response = await axios.get(`${this.url}/wallets/default`, {
+				headers: this.createAuthHeader(accessToken),
+			});
+			const defaultWallet = response.data;
+			return defaultWallet;
+		} catch (error: any) {
+			if (error instanceof AxiosError) this.catchError(error);
+			else throw error;
+		}
+	}
+
+	async getBalance(accessToken: string) {
+		try {
+			// Get the auth token
+			const response = await axios.get(`${this.url}/wallets/balance`, {
+				headers: this.createAuthHeader(accessToken),
+			});
+			const { balance } = response.data;
+			return balance;
+		} catch (error: any) {
+			if (error instanceof AxiosError) this.catchError(error);
+			else throw error;
+		}
+	}
+
+	async getAllWallets(accessToken: string) {
+		try {
+			// Get the auth token
+			const response = await axios.get(`${this.url}/wallets`, {
+				headers: this.createAuthHeader(accessToken),
+			});
+			const allWallets = response.data;
+			return allWallets;
+		} catch (error: any) {
+			if (error instanceof AxiosError) this.catchError(error);
+			else throw error;
+		}
+	}
+
+	async setDefaultWallet(accessToken: string, wallet: string) {
+		try {
+			// Get the auth token
+			const response = await axios.post(
+				`${this.url}/wallets/default`,
+				{ wallet },
+				{ headers: this.createAuthHeader(accessToken) }
+			);
+			const newDefaultWallet = response.data;
+			return newDefaultWallet;
+		} catch (error: any) {
+			if (error instanceof AxiosError) this.catchError(error);
+			else throw error;
+		}
+	}
+	async getTransationHistory(accessToken: string, page_number: number = 1) {
+		// Get the auth token
+		const response = await axios.get(`${this.url}/transfers`, {
+			data: { page_number },
+			headers: this.createAuthHeader(accessToken),
+		});
+		const newDefaultWallet = response.data;
+		return newDefaultWallet;
+	}
+	catch(error: any) {
+		if (error instanceof AxiosError) this.catchError(error);
+		else throw error;
 	}
 }

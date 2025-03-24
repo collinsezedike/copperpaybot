@@ -3,6 +3,7 @@ import { Message } from "node-telegram-bot-api";
 import bot from "../bot";
 
 import { logoutCommand } from "./auth";
+import { walletCommand } from "./wallet";
 
 import { START_MESSAGE } from "../utils/messages";
 
@@ -17,4 +18,4 @@ async function startCommand(msg: Message) {
 	bot.sendMessage(msg.chat.id, START_MESSAGE, options);
 }
 
-export { logoutCommand, startCommand };
+export { logoutCommand, startCommand, walletCommand };

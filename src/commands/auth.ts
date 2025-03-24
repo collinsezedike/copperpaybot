@@ -3,8 +3,7 @@ import { Message } from "node-telegram-bot-api";
 import bot from "../bot";
 import { CopperAPI } from "../utils/CopperAPI";
 import { POST_AUTH_MESSAGE } from "../utils/messages";
-
-const user = { email: "", sid: "", session: { scheme: "", accessToken: "" } };
+import { Session } from "../utils/Session";
 
 export async function authenticate(chat_id: number) {
 	try {
@@ -13,6 +12,7 @@ export async function authenticate(chat_id: number) {
 	} catch (error: any) {
 		console.log("Error in autheticate callback");
 		console.error(error.message);
+		bot.sendMessage(chat_id, "An error occured. Let's try that again!");
 	}
 }
 
@@ -22,9 +22,8 @@ async function requestEmailOTP(msg: Message) {
 		const email = msg.text;
 		const sid = await new CopperAPI().requestOTP(email);
 
-		// Save value to database
-		user.sid = sid;
-		user.email = email;
+		const session = new Session();
+		session.updateUserData(msg.chat.id, { email, sid });
 
 		bot.sendMessage(
 			msg.chat.id,
@@ -35,6 +34,7 @@ async function requestEmailOTP(msg: Message) {
 	} catch (error: any) {
 		console.log("Error in request email otp");
 		console.error(error.message);
+		bot.sendMessage(msg.chat.id, "An error occured. Let's try that again!");
 	}
 }
 
@@ -42,32 +42,39 @@ async function authenticateEmailOTP(msg: Message) {
 	try {
 		if (!msg.text) return;
 		const otp = msg.text;
-		const { email, sid } = user;
-		const data = await new CopperAPI().verifyOTP(email, sid, otp);
-		if (data) {
-			const { scheme, accessToken } = data;
+		const session = new Session();
+		const { email, sid } = await session.getUserData(msg.chat.id);
+		const accessToken = await new CopperAPI().verifyOTP(email, sid, otp);
+		await session.updateUserData(msg.chat.id, { accessToken });
 
-			// Add auth to user session
-			user.session.accessToken = accessToken;
-			user.session.scheme = scheme;
-		}
 		bot.removeListener("message", authenticateEmailOTP);
 		bot.sendMessage(msg.chat.id, POST_AUTH_MESSAGE);
 	} catch (error: any) {
 		console.log("Error in autheticate email otp");
 		console.error(error.message);
+		bot.sendMessage(msg.chat.id, "An error occured. Let's try that again!");
 	}
 }
 
 export async function logoutCommand(msg: Message) {
 	try {
-		// Fetch user session using chat id
-		const { accessToken } = user.session;
-		await new CopperAPI().logout(accessToken);
-		// If valid, log them out.
-		// If missing or invalid reply that they have already been logged out
+		const session = new Session();
+		const { accessToken } = await session.getUserData(msg.chat.id);
+		if (accessToken) {
+			await new CopperAPI().logout(accessToken);
+			await session.deleteUserData(msg.chat.id);
+		}
+		const options = {
+			reply_markup: {
+				inline_keyboard: [
+					[{ text: "Sign in", callback_data: "authenticate" }],
+				],
+			},
+		};
+		bot.sendMessage(msg.chat.id, "Logged out successfully.", options);
 	} catch (error: any) {
 		console.log("Error in loguot command");
 		console.error(error.message);
+		bot.sendMessage(msg.chat.id, "An error occured. Let's try that again!");
 	}
 }
