@@ -26,7 +26,7 @@ async function requestEmailOTP(msg: Message) {
 		const sid = await new CopperAPI().requestOTP(email);
 
 		const session = new Session();
-		session.updateUserData(msg.chat.id, { email, sid });
+		session.postSessionData(msg.chat.id, { email, sid });
 
 		bot.sendMessage(
 			msg.chat.id,
@@ -48,9 +48,11 @@ async function authenticateEmailOTP(msg: Message) {
 		if (!msg.text) return;
 		const otp = msg.text;
 		const session = new Session();
-		const { email, sid } = await session.getUserData(msg.chat.id);
+		const { user } = await session.getSessionData(msg.chat.id);
+		const { email, sid } = user;
+		console.log(email, sid, otp);
 		const accessToken = await new CopperAPI().verifyOTP(email, sid, otp);
-		await session.updateUserData(msg.chat.id, { accessToken });
+		await session.updateSessionData(msg.chat.id, { accessToken });
 
 		bot.removeListener("message", authenticateEmailOTP);
 		bot.sendMessage(msg.chat.id, POST_AUTH_MESSAGE);
@@ -72,7 +74,7 @@ export async function logoutCommand(msg: Message) {
 			return bot.sendMessage(msg.chat.id, message.text, message.options);
 		}
 		await new CopperAPI().logout(accessToken);
-		await new Session().deleteUserData(msg.chat.id);
+		await new Session().deleteSessionData(msg.chat.id);
 		const options = {
 			reply_markup: {
 				inline_keyboard: [

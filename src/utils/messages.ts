@@ -1,5 +1,5 @@
 export const START_MESSAGE = `
-Welcome to CopperPay!🎊\n\nSign in to get started.🚀,
+Welcome to CopperPay! 🎊\n\nSign in to get started. 🚀,
 `;
 
 export const POST_AUTH_MESSAGE = `

@@ -3,6 +3,7 @@ import { Message } from "node-telegram-bot-api";
 import bot from "../bot";
 
 import { logoutCommand } from "./auth";
+import { transferCommand } from "./transfer";
 import { walletCommand } from "./wallet";
 
 import { START_MESSAGE, HELP_MESSAGE } from "../utils/messages";
@@ -22,4 +23,4 @@ export function helpCommand(msg: Message) {
 	bot.sendMessage(msg.chat.id, HELP_MESSAGE);
 }
 
-export { logoutCommand, startCommand, walletCommand };
+export { logoutCommand, startCommand, transferCommand, walletCommand };

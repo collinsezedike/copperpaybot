@@ -1,5 +1,6 @@
 import "dotenv/config";
 import axios, { AxiosError } from "axios";
+import { TransferData } from "./types";
 
 // Environmental Variables
 const API_URL = process.env.COPPERX_API_ENDPOINT!;
@@ -79,6 +80,7 @@ export class CopperAPI {
 	}
 
 	// ** WALLET INTERACTIONS ** //
+
 	async getDefaultWallet(accessToken: string) {
 		try {
 			// Get the auth token
@@ -132,16 +134,109 @@ export class CopperAPI {
 			else throw error;
 		}
 	}
+
 	async getTransationHistory(accessToken: string, page_number: number = 1) {
-		// Get the auth token
-		const response = await axios.get(`${this.url}/transfers`, {
-			data: { page_number },
-			headers: this.createAuthHeader(accessToken),
-		});
-		return response.data;
+		try {
+			// Get the auth token
+			const response = await axios.get(`${this.url}/transfers`, {
+				data: { page_number },
+				headers: this.createAuthHeader(accessToken),
+			});
+			return response.data;
+		} catch (error: any) {
+			if (error instanceof AxiosError) this.catchError(error);
+			else throw error;
+		}
 	}
-	catch(error: any) {
-		if (error instanceof AxiosError) this.catchError(error);
-		else throw error;
+
+	// ** TRANSFER INTERACTIONS ** //
+
+	async performEmailTransfer(
+		accessToken: string,
+		transferData: TransferData
+	) {
+		try {
+			const response = await axios.post(
+				`${this.url}/transfers/send`,
+				transferData,
+				{ headers: this.createAuthHeader(accessToken) }
+			);
+			return response.data;
+		} catch (error: any) {
+			if (error instanceof AxiosError) this.catchError(error);
+			else throw error;
+		}
+	}
+
+	async performWalletTransfer(
+		accessToken: string,
+		transferData: TransferData
+	) {
+		try {
+			const response = await axios.post(
+				`${this.url}/transfers/wallet-withdraw`,
+				transferData,
+				{ headers: this.createAuthHeader(accessToken) }
+			);
+			return response.data;
+		} catch (error: any) {
+			if (error instanceof AxiosError) this.catchError(error);
+			else throw error;
+		}
+	}
+
+	async performBulkTransfer(
+		accessToken: string,
+		transferData: {
+			requestId: string;
+			request: TransferData;
+		}[]
+	) {
+		try {
+			const response = await axios.post(
+				`${this.url}/transfers/send-batch`,
+				{ requests: transferData },
+				{ headers: this.createAuthHeader(accessToken) }
+			);
+			return response.data;
+		} catch (error: any) {
+			if (error instanceof AxiosError) this.catchError(error);
+			else throw error;
+		}
+	}
+
+	async performBankWithdrawal(
+		accessToken: string,
+		transferData: TransferData
+	) {
+		try {
+			const response = await axios.post(
+				`${this.url}/transfers/send-batch`,
+				transferData,
+				{ headers: this.createAuthHeader(accessToken) }
+			);
+			return response.data;
+		} catch (error: any) {
+			if (error instanceof AxiosError) this.catchError(error);
+			else throw error;
+		}
+	}
+
+	async authenticateNotification(
+		accessToken: string,
+		socketId: string,
+		channel_name: string
+	) {
+		try {
+			const response = await axios.post(
+				`${this.url}/notifications/auth`,
+				{ socketId, channel_name },
+				{ headers: this.createAuthHeader(accessToken) }
+			);
+			return response.data;
+		} catch (error: any) {
+			if (error instanceof AxiosError) this.catchError(error);
+			else throw error;
+		}
 	}
 }

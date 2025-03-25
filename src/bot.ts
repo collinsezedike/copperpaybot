@@ -6,6 +6,7 @@ import {
 	helpCommand,
 	logoutCommand,
 	startCommand,
+	transferCommand,
 	walletCommand,
 } from "./commands";
 import {
@@ -13,15 +14,21 @@ import {
 	setDefaultWallet,
 	getTransationHistory,
 } from "./commands/wallet";
+import {
+	performBulkTransfer,
+	performEmailTransfer,
+	performWalletTransfer,
+} from "./commands/transfer";
 
 // Environmental Variables
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
 
-const bot = new TelegramBot(TOKEN);
+const bot = new TelegramBot(TOKEN, { polling: true });
 
 bot.onText(/\/help/, helpCommand);
 bot.onText(/\/start/, startCommand);
 bot.onText(/\/wallet/, walletCommand);
+bot.onText(/\/transfer/, transferCommand);
 bot.onText(/\/logout/, logoutCommand);
 
 // Handle callback queries
@@ -41,6 +48,15 @@ bot.on("callback_query", async function onCallbackQuery(callbackQuery) {
 			break;
 		case "get-transaction-history":
 			await getTransationHistory(msg?.chat.id!);
+			break;
+		case "perform-email-transfer":
+			await performEmailTransfer(msg?.chat.id!);
+			break;
+		case "perform-wallet-transfer":
+			await performWalletTransfer(msg?.chat.id!);
+			break;
+		case "perform-bulk-transfer":
+			await performBulkTransfer(msg?.chat.id!);
 			break;
 		default:
 			break;
