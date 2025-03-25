@@ -4,12 +4,12 @@ import express from "express";
 import bot from "./bot";
 
 const url = process.env.SERVER_URL;
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 
 const app = express();
 
 // This informs the Telegram servers of the new webhook.
-bot.setWebHook(`${url}/bot`);
+bot.setWebHook(`${url}/bot$`);
 
 // parse the updates to JSON
 app.use(express.json());
