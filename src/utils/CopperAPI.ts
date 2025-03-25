@@ -237,6 +237,19 @@ export class CopperAPI {
 		}
 	}
 
+	async getAuthProfile(accessToken: string) {
+		try {
+			const response = await axios.get(`${this.url}/auth/me`, {
+				data: null,
+				headers: this.createAuthHeader(accessToken),
+			});
+			return response.data;
+		} catch (error: any) {
+			if (error instanceof AxiosError) this.catchError(error);
+			else throw error;
+		}
+	}
+
 	async authenticateNotification(
 		accessToken: string,
 		socketId: string,
