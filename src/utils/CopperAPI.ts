@@ -222,6 +222,21 @@ export class CopperAPI {
 		}
 	}
 
+	async getKYCStatus(accessToken: string, email: string) {
+		try {
+			const response = await axios.get(
+				`${this.url}/kycs/status/${email}`,
+				{ data: null, headers: this.createAuthHeader(accessToken) }
+			);
+			return response.data;
+		} catch (error: any) {
+			if (error instanceof AxiosError) {
+				if (error.status === 400) return error.response;
+				this.catchError(error);
+			} else throw error;
+		}
+	}
+
 	async authenticateNotification(
 		accessToken: string,
 		socketId: string,

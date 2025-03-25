@@ -4,6 +4,7 @@ import TelegramBot from "node-telegram-bot-api";
 import { authenticate } from "./commands/auth";
 import {
 	helpCommand,
+	kycCommand,
 	logoutCommand,
 	startCommand,
 	transferCommand,
@@ -26,6 +27,7 @@ const TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
 const bot = new TelegramBot(TOKEN, { polling: true });
 
 bot.onText(/\/help/, helpCommand);
+bot.onText(/\/kyc/, kycCommand);
 bot.onText(/\/start/, startCommand);
 bot.onText(/\/wallet/, walletCommand);
 bot.onText(/\/transfer/, transferCommand);

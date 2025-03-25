@@ -3,6 +3,7 @@ import { ethers } from "ethers";
 
 import bot from "../bot";
 import { Session } from "./Session";
+import { CopperAPI } from "./CopperAPI";
 
 export async function getAccessToken(chat_id: number) {
 	const { user } = await new Session().getSessionData(chat_id);
@@ -29,6 +30,22 @@ export async function getAccessToken(chat_id: number) {
 			accessToken,
 			message: { text: "", options: {} },
 		};
+}
+
+export async function getKYCStatus(chat_id: number) {
+	const { user } = await new Session().getSessionData(chat_id);
+	const { accessToken, email } = user;
+	const { data } = await new CopperAPI().getKYCStatus(accessToken!, email);
+	console.log({ data });
+	if (data.statusCode === 400)
+		return {
+			isVerified: false,
+			message:
+				"🔒 To access this feature, please complete your KYC verification. This ensures the security of your transactions and compliance with regulations.\n\nUse the /kyc command to begin.",
+		};
+	else {
+		return { isVerified: true, message: "" };
+	}
 }
 
 export function getNetworkNameFromChainID(network: string) {

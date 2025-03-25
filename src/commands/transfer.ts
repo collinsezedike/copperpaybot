@@ -3,14 +3,19 @@ import { Message } from "node-telegram-bot-api";
 import bot from "../bot";
 
 import { CopperAPI } from "../utils/CopperAPI";
-import { getAccessToken, waitForReply } from "../utils/helpers";
+import { getAccessToken, getKYCStatus, waitForReply } from "../utils/helpers";
 
 export async function transferCommand(msg: Message) {
 	try {
-		// const { isAuthorized, message } = await getAccessToken(msg.chat.id);
-		// if (!isAuthorized) {
-		// 	return bot.sendMessage(msg.chat.id, message.text, message.options);
-		// }
+		const { isAuthorized, message } = await getAccessToken(msg.chat.id);
+		if (!isAuthorized) {
+			return bot.sendMessage(msg.chat.id, message.text, message.options);
+		} else {
+			const { isVerified, message } = await getKYCStatus(msg.chat.id);
+			if (!isVerified) {
+				return bot.sendMessage(msg.chat.id, message);
+			}
+		}
 		const options = {
 			reply_markup: {
 				inline_keyboard: [
@@ -54,6 +59,11 @@ export async function performEmailTransfer(chat_id: number) {
 		);
 		if (!isAuthorized) {
 			return bot.sendMessage(chat_id, message.text, message.options);
+		} else {
+			const { isVerified, message } = await getKYCStatus(chat_id);
+			if (!isVerified) {
+				return bot.sendMessage(chat_id, message);
+			}
 		}
 		bot.sendMessage(chat_id, "Provide the recipient email address:");
 		const email = await waitForReply(chat_id);
@@ -81,6 +91,11 @@ export async function performWalletTransfer(chat_id: number) {
 		);
 		if (!isAuthorized) {
 			return bot.sendMessage(chat_id, message.text, message.options);
+		} else {
+			const { isVerified, message } = await getKYCStatus(chat_id);
+			if (!isVerified) {
+				return bot.sendMessage(chat_id, message);
+			}
 		}
 		bot.sendMessage(chat_id, "Provide the recipient email address:");
 		const walletAddress = await waitForReply(chat_id);
@@ -108,6 +123,11 @@ export async function performBulkTransfer(chat_id: number) {
 		);
 		if (!isAuthorized) {
 			return bot.sendMessage(chat_id, message.text, message.options);
+		} else {
+			const { isVerified, message } = await getKYCStatus(chat_id);
+			if (!isVerified) {
+				return bot.sendMessage(chat_id, message);
+			}
 		}
 		bot.sendMessage(
 			chat_id,
