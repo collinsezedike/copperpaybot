@@ -31,6 +31,7 @@ CopperPayBot is a Telegram bot that allows users to manage their cryptocurrency 
 
     ```env
     COPPERX_API_ENDPOINT=copperx-api-url
+    SERVER_URL=your-server-url
     TELEGRAM_BOT_TOKEN=your-telegram-bot-token
     VITE_PUSHER_CLUSTER=your-pusher-cluster
     VITE_PUSHER_KEY=your-pusher-key
