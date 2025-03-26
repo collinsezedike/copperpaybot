@@ -15,26 +15,25 @@ export class Session {
 				port: Number(process.env.REDIS_PORT),
 			},
 		});
+		if (!this.client.isOpen) this.client.connect();
+		this.client.on("error", (err) =>
+			console.log("Redis Client Error", err)
+		);
 	}
 
 	async getSessionData(chat_id: number) {
-		await this.client.connect();
 		const sessionData = await this.client.hGetAll(chat_id.toString());
-		await this.client.disconnect();
 		return sessionData;
 	}
 
 	async postSessionData(chat_id: number, data: User) {
-		await this.client.connect();
 		if ("email" in data && "sid" in data) {
 			const newUser: User = { email: data.email, sid: data.sid };
 			await this.client.hSet(chat_id.toString(), newUser);
 		} else throw Error("Invalid session data");
-		await this.client.disconnect();
 	}
 
 	async updateSessionData(chat_id: number, partialData: Partial<User>) {
-		await this.client.connect();
 		const sessionKey = chat_id.toString();
 
 		const sessionData = await this.getSessionData(chat_id);
@@ -47,13 +46,10 @@ export class Session {
 				accessToken: updatedData.accessToken,
 			});
 		}
-		await this.client.disconnect();
 	}
 
 	async deleteSessionData(chat_id: number) {
-		await this.client.connect();
 		// Delete session from the database
 		await this.client.hDel(chat_id.toString(), "user");
-		await this.client.disconnect();
 	}
 }

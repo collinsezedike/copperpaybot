@@ -47,7 +47,6 @@ async function authenticateEmailOTP(msg: Message) {
 		const session = new Session();
 		const { email, sid } = await session.getSessionData(msg.chat.id);
 		const accessToken = await new CopperAPI().verifyOTP(email, sid, otp);
-		console.log({ email, sid, otp, accessToken });
 		await session.updateSessionData(msg.chat.id, { accessToken });
 		bot.removeListener("message", authenticateEmailOTP);
 		bot.sendMessage(msg.chat.id, POST_AUTH_MESSAGE);

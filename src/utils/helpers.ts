@@ -34,7 +34,6 @@ export async function getAccessToken(chat_id: number) {
 export async function getKYCStatus(chat_id: number) {
 	const { accessToken, email } = await new Session().getSessionData(chat_id);
 	const { data } = await new CopperAPI().getKYCStatus(accessToken!, email);
-	console.log({ data });
 	if (data.statusCode === 400)
 		return {
 			isVerified: false,
