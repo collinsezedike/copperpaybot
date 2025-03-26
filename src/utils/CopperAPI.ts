@@ -63,6 +63,7 @@ export class CopperAPI {
 			const { accessToken } = response.data;
 			return accessToken;
 		} catch (error: any) {
+			console.log({ error });
 			if (error instanceof AxiosError) this.catchError(error);
 			else throw error;
 		}

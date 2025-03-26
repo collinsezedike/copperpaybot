@@ -1,65 +1,59 @@
-import { TransferData, User } from "./types";
+import "dotenv/config";
+import { createClient, RedisClientType } from "redis";
 
-const user: User = { email: "", sid: "" };
-const transferData = { amount: "", purposeCode: "self" };
+import { User } from "./types";
+
 export class Session {
-	private user: User;
-	private transferData: TransferData;
+	private client: RedisClientType;
 
 	constructor() {
-		this.user = user;
-		this.transferData = transferData;
+		this.client = createClient({
+			username: process.env.REDIS_USERNAME,
+			password: process.env.REDIS_PASSWORD,
+			socket: {
+				host: process.env.REDIS_HOST,
+				port: Number(process.env.REDIS_PORT),
+			},
+		});
 	}
-
-	async connect() {}
-	async disconnect() {}
 
 	async getSessionData(chat_id: number) {
-		await this.connect();
-		// Get the session from the database
-		await this.disconnect();
-		return { user, transferData };
+		await this.client.connect();
+		const sessionData = await this.client.hGetAll(chat_id.toString());
+		await this.client.disconnect();
+		return sessionData;
 	}
 
-	async postSessionData(chat_id: number, data: User | TransferData) {
-		await this.connect();
-		// Create a new session in the database
+	async postSessionData(chat_id: number, data: User) {
+		await this.client.connect();
 		if ("email" in data && "sid" in data) {
 			const newUser: User = { email: data.email, sid: data.sid };
-			user.email = newUser.email;
-			user.sid = newUser.sid;
-			// } else if ( )
+			await this.client.hSet(chat_id.toString(), newUser);
 		} else throw Error("Invalid session data");
-		// Save the new session in the database
-		await this.disconnect();
+		await this.client.disconnect();
 	}
 
-	async updateSessionData(
-		chat_id: number,
-		partialData: Partial<User> | Partial<TransferData>
-	) {
-		await this.connect();
+	async updateSessionData(chat_id: number, partialData: Partial<User>) {
+		await this.client.connect();
+		const sessionKey = chat_id.toString();
+
 		const sessionData = await this.getSessionData(chat_id);
 		const updatedData = { ...sessionData, ...partialData };
+		console.log({ sessionData, partialData, updatedData });
 
 		// Update the user object
-		if ("accessToken" in updatedData) {
-			user.accessToken = updatedData.accessToken as string;
+		if ("accessToken" in updatedData && updatedData.accessToken) {
+			await this.client.hSet(sessionKey, {
+				accessToken: updatedData.accessToken,
+			});
 		}
-		if ("amount" in updatedData && "purposeCode" in updatedData) {
-			transferData.amount = updatedData.amount!;
-			transferData.purposeCode = updatedData.purposeCode!;
-		}
-		// Save the new session data in the database
-		await this.disconnect();
+		await this.client.disconnect();
 	}
 
 	async deleteSessionData(chat_id: number) {
-		await this.connect();
+		await this.client.connect();
 		// Delete session from the database
-		user.email = "";
-		user.sid = "";
-		user.accessToken = "";
-		await this.disconnect();
+		await this.client.hDel(chat_id.toString(), "user");
+		await this.client.disconnect();
 	}
 }

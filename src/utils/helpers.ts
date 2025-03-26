@@ -6,8 +6,7 @@ import { Session } from "./Session";
 import { CopperAPI } from "./CopperAPI";
 
 export async function getAccessToken(chat_id: number) {
-	const { user } = await new Session().getSessionData(chat_id);
-	const { accessToken } = user;
+	const { accessToken } = await new Session().getSessionData(chat_id);
 	if (!accessToken) {
 		const options = {
 			reply_markup: {
@@ -33,8 +32,7 @@ export async function getAccessToken(chat_id: number) {
 }
 
 export async function getKYCStatus(chat_id: number) {
-	const { user } = await new Session().getSessionData(chat_id);
-	const { accessToken, email } = user;
+	const { accessToken, email } = await new Session().getSessionData(chat_id);
 	const { data } = await new CopperAPI().getKYCStatus(accessToken!, email);
 	console.log({ data });
 	if (data.statusCode === 400)

@@ -5,7 +5,6 @@ import { CopperAPI } from "../utils/CopperAPI";
 import { POST_AUTH_MESSAGE } from "../utils/messages";
 import { Session } from "../utils/Session";
 import { getAccessToken } from "../utils/helpers";
-import { initializePusher } from "../utils/notification";
 
 export async function authenticate(chat_id: number) {
 	try {
@@ -25,10 +24,7 @@ async function requestEmailOTP(msg: Message) {
 		if (!msg.text) return;
 		const email = msg.text;
 		const sid = await new CopperAPI().requestOTP(email);
-
-		const session = new Session();
-		session.postSessionData(msg.chat.id, { email, sid });
-
+		await new Session().postSessionData(msg.chat.id, { email, sid });
 		bot.sendMessage(
 			msg.chat.id,
 			"Enter the OTP sent to the email address you provided:"
@@ -49,16 +45,12 @@ async function authenticateEmailOTP(msg: Message) {
 		if (!msg.text) return;
 		const otp = msg.text;
 		const session = new Session();
-		const { user } = await session.getSessionData(msg.chat.id);
-		const { email, sid } = user;
-		console.log(email, sid, otp);
+		const { email, sid } = await session.getSessionData(msg.chat.id);
 		const accessToken = await new CopperAPI().verifyOTP(email, sid, otp);
+		console.log({ email, sid, otp, accessToken });
 		await session.updateSessionData(msg.chat.id, { accessToken });
-
 		bot.removeListener("message", authenticateEmailOTP);
 		bot.sendMessage(msg.chat.id, POST_AUTH_MESSAGE);
-		// Initialize the notification pusher immedidtely after successful authentication
-		await initializePusher(msg.chat.id);
 	} catch (error: any) {
 		console.log("Error in autheticate email otp");
 		bot.sendMessage(
