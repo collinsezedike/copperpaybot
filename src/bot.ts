@@ -24,7 +24,8 @@ import {
 // Environmental Variables
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
 
-const bot = new TelegramBot(TOKEN, { polling: true });
+// const bot = new TelegramBot(TOKEN, { polling: true }); // Development
+const bot = new TelegramBot(TOKEN);
 
 bot.onText(/\/help/, helpCommand);
 bot.onText(/\/kyc/, kycCommand);
